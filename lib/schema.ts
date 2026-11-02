@@ -1,6 +1,7 @@
--- Progress database schema. Every user-owned table carries user_id,
--- and every query in lib/ filters on it, so users only see their own data.
-
+// Progress database schema. Every user-owned table carries user_id,
+// and every query filters on it, so users only see their own data.
+// Kept as a TS string so it ships with serverless bundles.
+export const SCHEMA = `
 CREATE TABLE IF NOT EXISTS users (
   id            INTEGER PRIMARY KEY AUTOINCREMENT,
   email         TEXT NOT NULL UNIQUE COLLATE NOCASE,
@@ -92,3 +93,4 @@ CREATE TABLE IF NOT EXISTS monthly_reviews (
   created_at  TEXT NOT NULL DEFAULT (datetime('now')),
   UNIQUE (user_id, month)
 );
+`;

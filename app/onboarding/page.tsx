@@ -4,14 +4,17 @@ import { formatGoal, getProfile, listGoals } from "@/lib/goals";
 import { getPlan } from "@/lib/plan";
 import Onboarding from "./Onboarding";
 
+// The AI breakdown runs as a server action on this page and can take up to a minute per goal.
+export const maxDuration = 300;
+
 export const metadata = { title: "Get started · Progress" };
 
 export default async function OnboardingPage() {
   const user = await requireUser();
-  const profile = getProfile(user.id);
+  const profile = await getProfile(user.id);
   if (profile.plan_confirmed_at) redirect("/");
-  const goals = listGoals(user.id);
-  const plan = getPlan(user.id);
+  const goals = await listGoals(user.id);
+  const plan = await getPlan(user.id);
   return (
     <Onboarding
       initialStep={profile.onboarding_step}
