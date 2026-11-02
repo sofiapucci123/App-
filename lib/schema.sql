@@ -33,6 +33,7 @@ CREATE TABLE IF NOT EXISTS goals (
   text       TEXT NOT NULL,
   why        TEXT NOT NULL DEFAULT '',
   kind       TEXT CHECK (kind IN ('habit','project')),
+  third_person INTEGER NOT NULL DEFAULT 0,  -- shown as "[Name] is a person who <text>"
   position   INTEGER NOT NULL DEFAULT 0,
   edited     INTEGER NOT NULL DEFAULT 0,
   created_at TEXT NOT NULL DEFAULT (datetime('now'))
