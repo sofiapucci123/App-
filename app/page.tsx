@@ -1,13 +1,13 @@
 import { redirect } from "next/navigation";
 import { requireUser } from "@/lib/auth";
-import { db } from "@/lib/db";
+import { get } from "@/lib/db";
 import { logOut } from "./actions/auth";
 
 // Placeholder home for step 1. Onboarding and the Today view replace this in later steps.
 export default async function Home() {
   const user = await requireUser();
   if (!user.plan_confirmed_at) redirect("/onboarding");
-  const goalCount = (db.prepare("SELECT COUNT(*) AS n FROM goals WHERE user_id = ?").get(user.id) as { n: number }).n;
+  const goalCount = (await get<{ n: number }>("SELECT COUNT(*) AS n FROM goals WHERE user_id = ?", [user.id]))!.n;
   return (
     <main className="auth">
       <div className="brand">
