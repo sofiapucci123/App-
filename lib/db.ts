@@ -16,7 +16,17 @@ function open() {
   db.pragma("foreign_keys = ON");
   const schema = fs.readFileSync(path.join(process.cwd(), "lib", "schema.sql"), "utf8");
   db.exec(schema);
+  migrate(db);
   return db;
+}
+
+// Columns added after the first release. CREATE TABLE IF NOT EXISTS won't add them to existing databases.
+function migrate(db: Database.Database) {
+  const addColumn = (table: string, column: string, ddl: string) => {
+    const cols = db.prepare(`PRAGMA table_info(${table})`).all() as { name: string }[];
+    if (!cols.some((c) => c.name === column)) db.exec(`ALTER TABLE ${table} ADD COLUMN ${ddl}`);
+  };
+  addColumn("goals", "third_person", "third_person INTEGER NOT NULL DEFAULT 0");
 }
 
 // Reuse one connection across hot reloads in dev.
