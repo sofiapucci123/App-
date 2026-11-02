@@ -3,6 +3,9 @@
 import { revalidatePath } from "next/cache";
 import { requireUser } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { AiFailedError, AiNotConfiguredError } from "@/lib/ai";
+import { DATE_RE } from "@/lib/dates";
+import { buildPlanForGoal } from "@/lib/plan";
 
 const MAX_STEP = 5;
 
@@ -64,4 +67,21 @@ export async function saveNameAndGoals(input: { name: string; thirdPerson: boole
 
   revalidatePath("/onboarding");
   return { ok: true, ids };
+}
+
+export type GeneratePlanResult = { ok: true; kind: string; months: number; tasks: number } | { ok: false; error: string };
+
+/** Screen 4: asks the AI for one yearly goal's monthly goals and daily tasks, and saves them. */
+export async function generatePlanForGoal(goalId: number, today: string): Promise<GeneratePlanResult> {
+  const user = await requireUser();
+  if (!Number.isInteger(goalId)) return { ok: false, error: "Unknown goal." };
+  if (!DATE_RE.test(today)) return { ok: false, error: "Invalid date." };
+  try {
+    const res = await buildPlanForGoal(user.id, goalId, today);
+    return { ok: true, ...res };
+  } catch (e) {
+    if (e instanceof AiNotConfiguredError || e instanceof AiFailedError) return { ok: false, error: e.message };
+    console.error("generatePlanForGoal failed", e);
+    return { ok: false, error: "Something went wrong while building the plan. Try again." };
+  }
 }

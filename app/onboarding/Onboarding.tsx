@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { saveNameAndGoals, setOnboardingStep, type GoalInput } from "../actions/onboarding";
+import { BreakdownScreen, PlanPreview, type GoalPlanView } from "./Breakdown";
 
 const TOTAL_SCREENS = 5;
 const MIN_FIELDS = 5;
@@ -25,9 +26,10 @@ type Props = {
   initialName: string;
   initialThirdPerson: boolean;
   initialGoals: GoalInput[];
+  plan: GoalPlanView[];
 };
 
-export default function Onboarding({ initialStep, initialName, initialThirdPerson, initialGoals }: Props) {
+export default function Onboarding({ initialStep, initialName, initialThirdPerson, initialGoals, plan }: Props) {
   const [step, setStep] = useState(Math.min(Math.max(initialStep, 1), TOTAL_SCREENS));
   const [name, setName] = useState(initialName);
   const [thirdPerson, setThirdPerson] = useState(initialThirdPerson);
@@ -242,22 +244,9 @@ export default function Onboarding({ initialStep, initialName, initialThirdPerso
         </section>
       )}
 
-      {step >= 4 && (
-        <section className="ob-screen">
-          <div className="ob-body">
-            <h1>Breaking it down…</h1>
-            <p className="muted">
-              Your name, goals and whys are saved. The AI breakdown into monthly goals and daily tasks is built in the
-              next step.
-            </p>
-          </div>
-          <div className="ob-actions">
-            <button className="btn" onClick={() => go(3)}>
-              Back
-            </button>
-          </div>
-        </section>
-      )}
+      {step === 4 && <BreakdownScreen plan={plan} onBack={() => go(3)} onDone={() => go(5)} />}
+
+      {step === 5 && <PlanPreview plan={plan} onBack={() => go(4)} />}
     </main>
   );
 }
